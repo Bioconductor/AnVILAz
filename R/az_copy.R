@@ -90,7 +90,7 @@ az_copy_from_storage <- function(from, to = ".") {
     path <- paste0(wscu, "/", from, "?")
     path <- paste0(path, token)
 
-    .az_copy(from = shQuote(path), to = to)
+    .az_copy(from = shQuote(path), to = .az_shQuote(to))
 }
 
 #' @rdname az_copy
@@ -115,7 +115,7 @@ az_copy_to_storage <- function(from, to) {
         path <- paste0(path, token)
     }
 
-    .az_copy(from, shQuote(path))
+    .az_copy(.az_shQuote(from), shQuote(path))
 }
 
 #' @rdname az_copy
@@ -180,7 +180,9 @@ az_copy_backup <- function(from_dir, to_dir, contentsOnly = FALSE) {
         path <- paste0(path, token)
     }
 
-    .az_copy(from = shQuote(from_dir), to = shQuote(path), "--recursive=true")
+    .az_copy(
+        from = .az_shQuote(from_dir), to = shQuote(path), "--recursive=true"
+    )
 }
 
 #' @rdname az_copy
@@ -203,7 +205,9 @@ az_copy_restore <- function(from_dir, to_dir = ".", contentsOnly = FALSE) {
     path <- paste0(wscu, "/", from_dir, "?")
     path <- paste0(path, token)
 
-    .az_copy(from = shQuote(path), to = shQuote(to_dir), "--recursive=true")
+    .az_copy(
+        from = shQuote(path), to = .az_shQuote(to_dir), "--recursive=true"
+    )
 }
 
 #' @importFrom BiocBaseUtils isScalarCharacter isCharacter

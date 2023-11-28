@@ -28,3 +28,13 @@
     )
     stop(message, call.=FALSE)
 }
+
+## from AnVILGCP
+.az_shQuote <- function(source) {
+    ## Expand local paths with ~ or . or .. to full path names.
+    ## Needed because we also use shQuote() (to allow for spaces in
+    ## file names), and shQuote() would otherwise use paths with ~ or
+    ## . in the current working directory.
+    source <- normalizePath(source)
+    shQuote(source)
+}

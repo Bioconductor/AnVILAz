@@ -62,11 +62,15 @@
 #'   az_copy_to_storage("jupyter.log", "analyses/test/")
 #'   ## placed in the base storage UUID directory
 #'   az_copy_to_storage("jupyter.log")
+#'   ## upload a directory
+#'   az_copy_backup("./test/", "analyses/test/", contentsOnly = TRUE)
 #'
 #'   ## remote -> local
 #'   az_copy_from_storage("analyses/jupyter.log", "jupyter.log")
 #'   ## download to the current directory
 #'   az_copy_from_storage("analyses/jupyter.log")
+#'   ## download a directory
+#'   az_copy_restore("analyses/test/", "./test/", contentsOnly = TRUE)
 #'
 #'   az_copy_rm("analyses/jupyter.log")
 #'
@@ -80,6 +84,7 @@ az_copy_from_storage <- function(from, to = ".") {
         stop("Provide a remote file location in the 'from' input")
     .validate_file(from)
 
+    to <- .az_shQuote(to)
     isdir <- file.info(to)[["isdir"]]
     if (isTRUE(isdir) || endsWith(to, "/"))
         to <- file.path(to, basename(from))
@@ -90,7 +95,7 @@ az_copy_from_storage <- function(from, to = ".") {
     path <- paste0(wscu, "/", from, "?")
     path <- paste0(path, token)
 
-    .az_copy(from = shQuote(path), to = .az_shQuote(to))
+    .az_copy(from = shQuote(path), to = to)
 }
 
 #' @rdname az_copy
@@ -167,6 +172,7 @@ az_copy_backup <- function(from_dir, to_dir, contentsOnly = FALSE) {
     )
 
     from_dir <- gsub("\\/$", "", from_dir)
+    from_dir <- .az_shQuote(from_dir)
     if (contentsOnly)
         from_dir <- paste0(from_dir, "/*")
 
@@ -181,7 +187,7 @@ az_copy_backup <- function(from_dir, to_dir, contentsOnly = FALSE) {
     }
 
     .az_copy(
-        from = .az_shQuote(from_dir), to = shQuote(path), "--recursive=true"
+        from = from_dir, to = shQuote(path), "--recursive=true"
     )
 }
 

@@ -172,7 +172,7 @@ az_copy_backup <- function(from_dir, to_dir, contentsOnly = FALSE) {
     )
 
     from_dir <- gsub("\\/$", "", from_dir)
-    from_dir <- .az_shQuote(from_dir)
+    from_dir <- normalizePath(from_dir)
     if (contentsOnly)
         from_dir <- paste0(from_dir, "/*")
 
@@ -187,7 +187,7 @@ az_copy_backup <- function(from_dir, to_dir, contentsOnly = FALSE) {
     }
 
     .az_copy(
-        from = from_dir, to = shQuote(path), "--recursive=true"
+        from = shQuote(from_dir), to = shQuote(path), "--recursive=true"
     )
 }
 

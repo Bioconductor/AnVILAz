@@ -24,16 +24,39 @@
 )
 }
 \arguments{
+\item{namespace}{\code{character(1)} AnVIL workspace namespace as returned by,
+e.g., \code{avworkspace_namespace()}}
+
+\item{name}{\code{character(1)} AnVIL workspace name as returned by, eg.,
+\code{avworkspace_name()}.}
+
 \item{...}{Additional arguments passed to lower level functions (not used)}
 
 \item{platform}{\code{azure()} The cloud platform class to dispatch on as given by
 \link[AnVILBase:cloud_platform]{AnVILBase::cloud_platform}. Typically not set manually as
 \code{cloud_platform()} returns the \code{"azure"} class for Azure workspaces on
 AnVIL.}
+
+\item{.data}{A tibble or data.frame for import as an AnVIL table.}
+}
+\value{
+\code{avdata()} returns a tibble with five columns: \code{"type"}
+represents the origin of the data from the 'REFERENCE' or
+'OTHER' data menus. \code{"table"} is the table name in the
+\code{REFERENCE} menu, or 'workspace' for the table in the 'OTHER'
+menu, the key used to access the data element, the value label
+associated with the data element and the value (e.g., google
+bucket) of the element.
+
+\code{avdata_import()} returns, invisibly, the subset of the
+input table used to update the AnVIL tables.
 }
 \description{
-This file contains methods for working with "Reference" and
-"Other" data on AnVIL.
+\code{avdata()} returns key-value tables representing the
+information visualized under the DATA tab, 'REFERENCE DATA' and
+'OTHER DATA' items.  \code{avdata_import()} updates (modifies or
+creates new, but does not delete) rows in 'REFERENCE DATA' or
+'OTHER DATA' tables.
 }
 \section{Functions}{
 \itemize{

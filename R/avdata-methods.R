@@ -4,10 +4,22 @@
 #'
 #' @title Azure "Reference" and "Other" Data methods on AnVIL
 #'
-#' @description This file contains methods for working with "Reference" and
-#'   "Other" data on AnVIL.
+#' @description `avdata()` returns key-value tables representing the
+#'     information visualized under the DATA tab, 'REFERENCE DATA' and
+#'     'OTHER DATA' items.  `avdata_import()` updates (modifies or
+#'     creates new, but does not delete) rows in 'REFERENCE DATA' or
+#'     'OTHER DATA' tables.
+#'
+#' @return `avdata()` returns a tibble with five columns: `"type"`
+#'     represents the origin of the data from the 'REFERENCE' or
+#'     'OTHER' data menus. `"table"` is the table name in the
+#'     `REFERENCE` menu, or 'workspace' for the table in the 'OTHER'
+#'     menu, the key used to access the data element, the value label
+#'     associated with the data element and the value (e.g., google
+#'     bucket) of the element.
 #'
 #' @inheritParams azure-methods
+#' @inheritParams avworkspace-methods
 #'
 #' @include azure-class.R
 #'
@@ -23,6 +35,11 @@ NULL
 # avdata -----------------------------------------------------------------
 
 #' @describeIn avdata-methods List the available "Reference" and "Other" data
+#'
+#' @param .data A tibble or data.frame for import as an AnVIL table.
+#'
+#' @return `avdata_import()` returns, invisibly, the subset of the
+#'     input table used to update the AnVIL tables.
 #'
 #' @importFrom AnVILBase avdata
 #' @exportMethod avdata

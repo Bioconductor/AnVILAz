@@ -21,6 +21,7 @@ Encoding: UTF-8
 Imports:
     AnVILBase,
     BiocBaseUtils,
+    curl,
     httr2,
     jsonlite,
     methods,

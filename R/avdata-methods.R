@@ -130,7 +130,7 @@ setMethod("avdata_import", signature = c(platform = "azure"), definition =
         )
 
         .data <- subset(
-            .data, .data$type == "other", .data$table %in% "workspace"
+            .data, .data$type == "other" & .data$table %in% "workspace"
         )
 
         if (!nrow(.data)) {
@@ -141,11 +141,6 @@ setMethod("avdata_import", signature = c(platform = "azure"), definition =
             return(invisible(.data))
         }
 
-        ## create a 'wide' table, with keys as column names and values as
-        ## first row. Prefix "workspace:" to first column, for import
-        keys <- paste0("workspace:", paste(.data$key, collapse = "\t"))
-        values <- paste(.data$value, collapse = "\t")
-
         request(.RAWLS_URL) |>
             req_template(
                 "/api/workspaces/{workspaceNamespace}/{workspaceName}",
@@ -153,13 +148,14 @@ setMethod("avdata_import", signature = c(platform = "azure"), definition =
                 workspaceName = name
             ) |>
             req_auth_bearer_token(az_token()) |>
+            req_method("PATCH") |>
             req_body_json(
-                list(
+                data.frame(
                     op = "AddUpdateAttributes",
-                    attributeName = keys,
-                    addUpdateAttribute = values
+                    attributeName = .data$key,
+                    addUpdateAttribute = .data$value,
                 )
-            )
+            ) |>
             req_perform()
 
         invisible(.data)

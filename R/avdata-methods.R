@@ -1,5 +1,7 @@
 #' @name avdata-methods
 #'
+#' @aliases avdata avdata_import
+#'
 #' @title Azure "Reference" and "Other" Data methods on AnVIL
 #'
 #' @description This file contains methods for working with "Reference" and
@@ -8,6 +10,13 @@
 #' @inheritParams azure-methods
 #'
 #' @include azure-class.R
+#'
+#' @examples
+#' if (az_exists() && identical(get_platform(), "AnVILAz")) {
+#'    ## from within AnVIL
+#'    data <- avdata()
+#'    avdata_import(data)
+#' }
 #'
 NULL
 
@@ -29,12 +38,12 @@ setMethod("avdata", signature = c(platform = "azure"),
 
         name <- utils::URLencode(name)
 
-        api_endpoint <-
-            "/api/workspaces/{{workspaceNamespace}}/{{workspaceName}}"
-        url <- paste0(.LEONARDO_URL, api_endpoint)
-        url <- whisker.render(url)
-
-        response <- request(url) |>
+        response <- request(.LEONARDO_URL) |>
+            req_template(
+                "/api/workspaces/{workspaceNamespace}/{workspaceName}",
+                workspaceNamespace = namespace,
+                workspaceName = name
+            ) |>
             req_auth_bearer_token(az_token()) |>
             req_perform() |>
             resp_body_json()
@@ -93,5 +102,66 @@ setMethod("avdata", signature = c(platform = "azure"),
         } else {
             dplyr::bind_rows(otherData_tbl, referenceData_tbl)
         }
+    }
+)
+
+# avdata_import -----------------------------------------------------------
+
+#' @describeIn avdata-methods Import "Reference" and "Other" data to an AnVIL
+#'   workspace
+#'
+#' @importFrom AnVILBase avdata_import
+#' @exportMethod avdata_import
+setMethod("avdata_import", signature = c(platform = "azure"), definition =
+    function(
+        .data, namespace = avworkspace_namespace(), name = avworkspace_name(),
+        ..., platform = cloud_platform()
+    ) {
+        stopifnot(
+            is.data.frame(.data),
+            all(c("type", "table", "key", "value") %in% names(.data)),
+            all(vapply(
+                select(.data, "type", "table", "key", "value"),
+                is.character,
+                logical(1)
+            )),
+            isScalarCharacter(namespace),
+            isScalarCharacter(name)
+        )
+
+        .data <- subset(
+            .data, .data$type == "other", .data$table %in% "workspace"
+        )
+
+        if (!nrow(.data)) {
+            message(
+                "'avdata_import()' has no rows of type 'other' and ",
+                "table 'workspace'"
+            )
+            return(invisible(.data))
+        }
+
+        ## create a 'wide' table, with keys as column names and values as
+        ## first row. Prefix "workspace:" to first column, for import
+        keys <- paste0("workspace:", paste(.data$key, collapse = "\t"))
+        values <- paste(.data$value, collapse = "\t")
+
+        request(.LEONARDO_URL) |>
+            req_template(
+                "/api/workspaces/{workspaceNamespace}/{workspaceName}",
+                workspaceNamespace = namespace,
+                workspaceName = name
+            ) |>
+            req_auth_bearer_token(az_token()) |>
+            req_body_json(
+                list(
+                    op = "AddUpdateAttributes",
+                    attributeName = keys,
+                    addUpdateAttribute = values
+                )
+            )
+            req_perform()
+
+        invisible(.data)
     }
 )

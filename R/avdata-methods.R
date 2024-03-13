@@ -38,7 +38,7 @@ setMethod("avdata", signature = c(platform = "azure"),
 
         name <- utils::URLencode(name)
 
-        response <- request(.LEONARDO_URL) |>
+        response <- request(.RAWLS_URL) |>
             req_template(
                 "/api/workspaces/{workspaceNamespace}/{workspaceName}",
                 workspaceNamespace = namespace,
@@ -146,7 +146,7 @@ setMethod("avdata_import", signature = c(platform = "azure"), definition =
         keys <- paste0("workspace:", paste(.data$key, collapse = "\t"))
         values <- paste(.data$value, collapse = "\t")
 
-        request(.LEONARDO_URL) |>
+        request(.RAWLS_URL) |>
             req_template(
                 "/api/workspaces/{workspaceNamespace}/{workspaceName}",
                 workspaceNamespace = namespace,
